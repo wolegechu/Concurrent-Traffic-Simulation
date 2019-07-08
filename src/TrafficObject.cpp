@@ -1,12 +1,9 @@
-#include <algorithm>
 #include <iostream>
 #include <chrono>
 #include "TrafficObject.h"
 
 // init static variable
 int TrafficObject::_idCnt = 0;
-
-std::mutex TrafficObject::_mtx;
 
 void TrafficObject::setPosition(double x, double y)
 {
@@ -28,8 +25,5 @@ TrafficObject::TrafficObject()
 
 TrafficObject::~TrafficObject()
 {
-    // set up thread barrier before this object is destroyed
-    std::for_each(threads.begin(), threads.end(), [](std::thread &t) {
-        t.join();
-    });
+    // Task L1.1 : Set up a thread barrier that ensures that all the thread objects in the member vector _threads are joined.
 }

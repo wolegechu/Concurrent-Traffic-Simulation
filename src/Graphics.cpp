@@ -26,6 +26,7 @@ void Graphics::loadBackgroundImg()
 
     // load image and create copy to be used for semi-transparent overlay
     cv::Mat background = cv::imread(_bgFilename);
+  
     _images.push_back(background);         // first element is the original background
     _images.push_back(background.clone()); // second element will be the transparent overlay
     _images.push_back(background.clone()); // third element will be the result image for display
@@ -48,9 +49,8 @@ void Graphics::drawTrafficObjects()
             // cast object type from TrafficObject to Intersection
             std::shared_ptr<Intersection> intersection = std::dynamic_pointer_cast<Intersection>(it);
 
-            // set color according to traffic light and draw the intersection as a circle
-            cv::Scalar trafficLightColor = intersection->trafficLightIsGreen() == true ? cv::Scalar(0, 255, 0) : cv::Scalar(0, 0, 255);
-            cv::circle(_images.at(1), cv::Point2d(posx, posy), 25, trafficLightColor, -1);
+            // intersections are green
+            cv::circle(_images.at(1), cv::Point2d(posx, posy), 25, cv::Scalar(0, 255, 0), -1);
         }
         else if (it->getType() == ObjectType::objectVehicle)
         {
