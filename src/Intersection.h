@@ -11,6 +11,20 @@
 class Street;
 class Vehicle;
 
+// auxiliary class to queue and dequeue waiting vehicles in a thread-safe manner
+class WaitingVehicles
+{
+public:
+    int getSize();
+
+    void pushBack(std::shared_ptr<Vehicle> vehicle, std::promise<void> &&promise);
+    void permitEntryToFirstInQueue();
+
+private:
+    std::vector<std::shared_ptr<Vehicle>> _vehicles;
+    std::vector<std::promise<void>> _promises;
+};
+
 class Intersection : public TrafficObject
 {
 public:
@@ -18,15 +32,24 @@ public:
     Intersection();
 
     // getters / setters
+    void setIsBlocked(bool isBlocked);
 
     // typical behaviour methods
+    void addVehicleToQueue(std::shared_ptr<Vehicle> vehicle);
     void addStreet(std::shared_ptr<Street> street);
     std::vector<std::shared_ptr<Street>> queryStreets(std::shared_ptr<Street> incoming); // return pointer to current list of all outgoing streets
+    void simulate();
+    void vehicleHasLeft(std::shared_ptr<Vehicle> vehicle);
+    bool trafficLightIsGreen();
 
 private:
 
     // typical behaviour methods
+    void processVehicleQueue();
+
     std::vector<std::shared_ptr<Street>> _streets;   // list of all streets connected to this intersection
+    WaitingVehicles _waitingVehicles; // list of all vehicles and their associated promises wiating to enter the intersection
+    bool _isBlocked; // block queue processing or not
 };
 
 #endif

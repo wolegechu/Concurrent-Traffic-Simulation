@@ -1,6 +1,7 @@
 #ifndef VEHICLE_H
 #define VEHICLE_H
 
+#include <mutex>
 #include "TrafficObject.h"
 
 // forward declarations to avoid include cycle
@@ -31,6 +32,8 @@ private:
     std::shared_ptr<Intersection> _currDestination; // destination to which the vehicle is currently driving
     double _posStreet;                              // position on current street
     double _speed;                                  // ego speed in m/s
+
+    std::mutex _mtx;
 };
 
 #endif
