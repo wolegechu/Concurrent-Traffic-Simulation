@@ -32,8 +32,6 @@ private:
     std::shared_ptr<Intersection> _currDestination; // destination to which the vehicle is currently driving
     double _posStreet;                              // position on current street
     double _speed;                                  // ego speed in m/s
-
-    std::mutex _mtx;
 };
 
 #endif

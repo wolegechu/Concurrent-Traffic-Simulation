@@ -8,19 +8,27 @@
 #include "Intersection.h"
 #include "Vehicle.h"
 
+std::mutex TrafficObject::_mtxCout;
+
 int WaitingVehicles::getSize()
 {
+    std::lock_guard<std::mutex> lock(_mutex);
+
     return _vehicles.size();
 }
 
 void WaitingVehicles::pushBack(std::shared_ptr<Vehicle> vehicle, std::promise<void> &&promise)
 {
+    std::lock_guard<std::mutex> lock(_mutex);
+
     _vehicles.push_back(vehicle);
     _promises.push_back(std::move(promise));
 }
 
 void WaitingVehicles::permitEntryToFirstInQueue()
 {
+    std::lock_guard<std::mutex> lock(_mutex);
+
     auto firstVehiclePrms = _promises.begin();
     auto firstVehicle = _vehicles.begin();
 
@@ -57,8 +65,10 @@ std::vector<std::shared_ptr<Street>> Intersection::queryStreets(std::shared_ptr<
 
 void Intersection::addVehicleToQueue(std::shared_ptr<Vehicle> vehicle)
 {
+    std::unique_lock<std::mutex> lck(_mtxCout);
     std::cout << "Intersection #" << _id << "::addVehicleToQueue: thread id = " <<
         std::this_thread::get_id() << std::endl;
+    lck.unlock();
     
     std::promise<void> prmsVehicleAllowedToEnter;
     std::future<void> ftrVehicleAllowedToEnter = prmsVehicleAllowedToEnter.get_future();
@@ -66,8 +76,10 @@ void Intersection::addVehicleToQueue(std::shared_ptr<Vehicle> vehicle)
     _waitingVehicles.pushBack(vehicle, std::move(prmsVehicleAllowedToEnter));
     ftrVehicleAllowedToEnter.wait();
     
+    lck.lock();
     std::cout << "Intersection #" << _id << ": Vehicle #" << vehicle->getID() <<
         " is granted entry." << std::endl;
+    lck.unlock();
 }
 
 void Intersection::vehicleHasLeft(std::shared_ptr<Vehicle> vehicle)

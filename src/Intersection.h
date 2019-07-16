@@ -23,6 +23,7 @@ public:
 private:
     std::vector<std::shared_ptr<Vehicle>> _vehicles;
     std::vector<std::promise<void>> _promises;
+    std::mutex _mutex;
 };
 
 class Intersection : public TrafficObject
