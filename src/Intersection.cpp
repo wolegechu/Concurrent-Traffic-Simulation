@@ -63,6 +63,10 @@ std::vector<std::shared_ptr<Street>> Intersection::queryStreets(std::shared_ptr<
     return outgoings;
 }
 
+bool Intersection::trafficLightIsGreen(){
+    return _trafficLight.getCurrentPhase() == green;
+}
+
 void Intersection::addVehicleToQueue(std::shared_ptr<Vehicle> vehicle)
 {
     std::unique_lock<std::mutex> lck(_mtxCout);
@@ -73,6 +77,10 @@ void Intersection::addVehicleToQueue(std::shared_ptr<Vehicle> vehicle)
     std::promise<void> prmsVehicleAllowedToEnter;
     std::future<void> ftrVehicleAllowedToEnter = prmsVehicleAllowedToEnter.get_future();
     
+    if(!trafficLightIsGreen()){
+        _trafficLight.waitForGreen();
+    }
+
     _waitingVehicles.pushBack(vehicle, std::move(prmsVehicleAllowedToEnter));
     ftrVehicleAllowedToEnter.wait();
     
@@ -94,6 +102,7 @@ void Intersection::setIsBlocked(bool isBlocked)
 
 void Intersection::simulate()
 {
+    _trafficLight.simulate();
     threads.emplace_back(std::thread(&Intersection::processVehicleQueue, this));
 }
 

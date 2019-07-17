@@ -4,6 +4,7 @@
 #include <mutex>
 #include <deque>
 #include <condition_variable>
+
 #include "TrafficObject.h"
 
 // forward declarations to avoid include cycle
@@ -19,11 +20,11 @@ template <class T>
 class MessageQueue
 {
 public:
-void send(TrafficLightPhase &&lightPhase);
-TrafficLightPhase receive();
+void send(T &&msg);
+T receive();
 
 private:
-    std::dequeue<TrafficLightPhase> _queue;
+    std::deque<T> _queue;
     std::condition_variable _condition;
     std::mutex _mutex;
 };
@@ -43,6 +44,7 @@ class TrafficLight : TrafficObject
 {
 public:
     // constructor / desctructor
+    TrafficLight();
 
     // getters / setters
 
@@ -63,7 +65,8 @@ private:
     std::condition_variable _condition;
     std::mutex _mutex;
 
-    TrafficLightPhase _current_phase;
+    TrafficLightPhase _currentPhase;
+    MessageQueue<TrafficLightPhase> _queue;
 };
 
 #endif

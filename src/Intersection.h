@@ -5,7 +5,9 @@
 #include <future>
 #include <mutex>
 #include <memory>
+
 #include "TrafficObject.h"
+#include "TrafficLight.h"
 
 // forward declarations to avoid include cycle
 class Street;
@@ -48,9 +50,9 @@ private:
     // typical behaviour methods
     void processVehicleQueue();
 
-    std::vector<std::shared_ptr<Street>> _streets;   // list of all streets connected to this intersection
+    std::vector<std::shared_ptr<Street>> _streets;
     WaitingVehicles _waitingVehicles; // list of all vehicles and their associated promises wiating to enter the intersection
     bool _isBlocked; // block queue processing or not
+    TrafficLight _trafficLight;
 };
-
 #endif
