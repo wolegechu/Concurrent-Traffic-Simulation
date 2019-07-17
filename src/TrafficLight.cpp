@@ -1,5 +1,9 @@
 #include <iostream>
 #include <random>
+#include <thread>
+#include <chrono>
+#include <random>
+
 #include "TrafficLight.h"
 
 /* Implementation of class "MessageQueue" */
@@ -40,19 +44,41 @@ TrafficLightPhase TrafficLight::getCurrentPhase()
 {
     return _currentPhase;
 }
-
+*/
 void TrafficLight::simulate()
 {
     // FP.2b : Finally, the private method „cycleThroughPhases“ should be started in a thread when the public method „simulate“ is called. To do this, use the thread queue in the base class. 
+    threads.emplace_back(std::thread(&TrafficLight::cycleThroughPhases, this));
 }
 
-// virtual function which is executed in a thread
 void TrafficLight::cycleThroughPhases()
 {
     // FP.2a : Implement the function with an infinite loop that measures the time between two loop cycles 
     // and toggles the current phase of the traffic light between red and green and sends an update method 
     // to the message queue using move semantics. The cycle duration should be a random value between 4 and 6 seconds. 
-    // Also, the while-loop should use std::this_thread::sleep_for to wait 1ms between two cycles. 
-}
+    // Also, the while-loop should use std::this_thread::sleep_for to wait 1ms between two cycles.
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<int> dist(4000, 6000);
+    int cycleDuration = dist(gen);
 
-*/
+    auto lastSwitchedTime = std::chrono::system_clock::now();
+    while (true)
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+        auto tmpSeconds = std::chrono::duration_cast<std::chrono::milliseconds>
+                                (std::chrono::system_clock::now() - lastSwitchedTime);
+        int durationSinceSwitched = tmpSeconds.count();
+        
+        if(durationSinceSwitched >= cycleDuration){
+            _current_phase = _current_phase == red ? green : red;
+
+            // TODO: To send message
+            lastSwitchedTime = std::chrono::system_clock::now();
+            cycleDuration = dist(gen);
+        }
+        
+    }
+    
+}
